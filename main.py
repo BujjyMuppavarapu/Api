@@ -1,18 +1,28 @@
-from enum import Enum
-from fastapi import FastAPI
+from datetime import datetime, time, timedelta
+from typing import Annotated
+from uuid import UUID
+
+from fastapi import Body, FastAPI
 
 app = FastAPI()
 
-# Define an enum
-class ModelName(str, Enum):
-    alexnet = "alexnet"
-    resnet = "resnet"
-    lenet = "lenet"
 
-@app.get("/models/{model_name}")
-async def get_model(model_name: ModelName):
-    if model_name == ModelName.alexnet:
-        return {"model_name": model_name, "message": "Deep Learning pioneer!"}
-    if model_name == ModelName.resnet:
-        return {"model_name": model_name, "message": "Residual connections FTW!"}
-    return {"model_name": model_name, "message": "LeNet – old but gold"}
+@app.put("/items/{item_id}")
+async def read_items(
+    item_id: UUID,
+    start_datetime: Annotated[datetime, Body()],
+    end_datetime: Annotated[datetime, Body()],
+    process_after: Annotated[timedelta, Body()],
+    repeat_at: Annotated[time | None, Body()] = None,
+):
+    start_process = start_datetime + process_after
+    duration = end_datetime - start_process
+    return {
+        "item_id": item_id,
+        "start_datetime": start_datetime,
+        "end_datetime": end_datetime,
+        "process_after": process_after,
+        "repeat_at": repeat_at,
+        "start_process": start_process,
+        "duration": duration,
+    }
